@@ -1,15 +1,39 @@
-import React, { useEffect, useState, useRef } from "react";
-import { DndContext, closestCorners } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { Bar } from "react-chartjs-2";
-import "chart.js/auto";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import UserSidebar from "./UserSidebar";
-import Column from "./Column";
-import SortableItem from "./SortableItem";
-import notificationSound from "./notification.mp3";
+import 'chart.js/auto';
+import 'react-toastify/dist/ReactToastify.css';
 
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+
+import {
+  CheckCircle,
+  Clock,
+  XCircle,
+} from 'lucide-react';
+import { Bar } from 'react-chartjs-2';
+import {
+  toast,
+  ToastContainer,
+} from 'react-toastify';
+
+import {
+  closestCorners,
+  DndContext,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+
+import Column from './Column';
+import notificationSound from './notification.mp3';
+import SortableItem from './SortableItem';
+import UserSidebar from './UserSidebar';
+
+const DEFAULT_FILTER_OPTION = "all";
 const UserDashboard = () => {
   const [tasks, setTasks] = useState({
     "To Do": [],
@@ -104,6 +128,24 @@ const UserDashboard = () => {
     ],
   };
 
+  const [taskStatusFilter, setTaskStatusFilter] = useState(DEFAULT_FILTER_OPTION);
+
+  const selectStatusFilter = (status) => () => {
+    if (taskStatusFilter === status) {
+      setTaskStatusFilter(DEFAULT_FILTER_OPTION);
+    } else {
+      setTaskStatusFilter(status);
+    }
+  };
+
+  const filteredTasks = useMemo(() => {
+    if (taskStatusFilter === DEFAULT_FILTER_OPTION) return tasks;
+
+    return Object.fromEntries(
+      Object.entries(tasks).filter(([key]) => key === taskStatusFilter)
+    );
+  }, [tasks, taskStatusFilter]);
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-100 to-gray-100">
       <UserSidebar />
@@ -114,14 +156,27 @@ const UserDashboard = () => {
         </h2>
         <ToastContainer position="top-right" autoClose={5000} hideProgressBar />
 
+        {/* Task filters Section */}
+        <div className="mt-10 flex flex-row space-x-4">
+          <button onClick={selectStatusFilter('To Do')} className={`${
+            taskStatusFilter === 'To Do' ? 'bg-blue-500' : 'bg-gray-700'
+          } text-white p-2 rounded-md transition-colors`}><CheckCircle className="inline mr-1" /> Show to-do tasks</button>
+          <button onClick={selectStatusFilter('In Progress')} className={`${
+            taskStatusFilter === 'In Progress' ? 'bg-blue-500' : 'bg-gray-700'
+          } text-white p-2 rounded-md transition-colors`}><Clock className="inline mr-1" /> Show in-progress tasks</button>
+          <button onClick={selectStatusFilter('Completed')} className={`${
+            taskStatusFilter === 'Completed' ? 'bg-blue-500' : 'bg-gray-700'
+          } text-white p-2 rounded-md transition-colors`}><XCircle className="inline mr-1" /> Show completed tasks</button>
+        </div>
+
         {/* Kanban Board */}
         <div className="glassmorphism p-4 rounded-xl shadow-lg bg-gradient-to-br from-white/30 to-white/10 backdrop-blur-lg border border-white/20">
           <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.keys(tasks).map((columnKey) => (
+              {Object.keys(filteredTasks).map((columnKey) => (
                 <Column key={columnKey} title={columnKey} id={columnKey} className="w-[280px]">
-                  <SortableContext items={tasks[columnKey].map((task) => task.id)} strategy={verticalListSortingStrategy}>
-                    {tasks[columnKey].map((task) => (
+                  <SortableContext items={filteredTasks[columnKey].map((task) => task.id)} strategy={verticalListSortingStrategy}>
+                    {filteredTasks[columnKey].map((task) => (
                       <SortableItem key={task.id} id={task.id} task={task} />
                     ))}
                   </SortableContext>
