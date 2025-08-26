@@ -16,10 +16,24 @@
  * @version 2.0.0
  */
 
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import { FaLock, FaEnvelope, FaExclamationCircle, FaSpinner } from "react-icons/fa";
+import React, {
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  FaEnvelope,
+  FaExclamationCircle,
+  FaLock,
+  FaSpinner,
+} from 'react-icons/fa';
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom';
+
+import { useAuth } from '../../contexts/AuthContext';
 
 const Login = () => {
   // State management with proper initialization
@@ -51,7 +65,6 @@ const Login = () => {
 
   /**
    * Handles form submission and authentication
-   * Implements localStorage-based authentication with support for custom users
    * 
    * @param {Event} e - The form submission event
    */
@@ -69,17 +82,16 @@ const Login = () => {
     setLoading(true);
     
     try {
-      // Simulate network latency for realistic UX
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       // Get stored users from localStorage or initialize with default users
-      const storedUsers = JSON.parse(localStorage.getItem('users') || JSON.stringify([
+      const storedUsers =  [
         { email: 'admin@example.com', password: 'password123', role: 'admin', userId: 'admin-123' },
         { email: 'user@example.com', password: 'password123', role: 'user', userId: 'user-456' }
-      ]));
+      ]
       
       // Find matching user
       const user = storedUsers.find(u => u.email === email && u.password === password);
+
+      console.log({user})
       
       if (user) {
         // User found, proceed with login
@@ -110,17 +122,19 @@ const Login = () => {
         console.log("User login:", logData);
         
         // Update authentication context
-        login(email);
-        
-        // Navigate to appropriate dashboard or requested page
-        navigate(from !== "/" ? from : (user.role === "admin" ? "/admin/dashboard" : "/user/dashboard"));
-      } else {
-        // Invalid credentials
-        setError("Invalid email or password");
-      }
+      login(email, password, role);
+
+      // Navigate to appropriate dashboard or requested page
+      navigate(from !== "/" ? from : (role === "admin" ? "/admin/dashboard" : "/user/dashboard"));
+      return;
+    }
+
+      await login(email, password, role);
+      navigate(from !== "/" ? from : (role === "admin" ? "/admin/dashboard" : "/user/dashboard"));
+      
     } catch (err) {
       console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      setError(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }

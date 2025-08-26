@@ -160,13 +160,13 @@ const UserDashboard = () => {
         <div className="mt-10 flex flex-row space-x-4">
           <button onClick={selectStatusFilter('To Do')} className={`${
             taskStatusFilter === 'To Do' ? 'bg-blue-500' : 'bg-gray-700'
-          } text-white p-2 rounded-md transition-colors`}><CheckCircle className="inline mr-1" /> Show to-do tasks</button>
+          } text-white p-2 rounded-md transition-colors`}><XCircle className="inline mr-1" /> Show to-do tasks</button>
           <button onClick={selectStatusFilter('In Progress')} className={`${
             taskStatusFilter === 'In Progress' ? 'bg-blue-500' : 'bg-gray-700'
           } text-white p-2 rounded-md transition-colors`}><Clock className="inline mr-1" /> Show in-progress tasks</button>
           <button onClick={selectStatusFilter('Completed')} className={`${
             taskStatusFilter === 'Completed' ? 'bg-blue-500' : 'bg-gray-700'
-          } text-white p-2 rounded-md transition-colors`}><XCircle className="inline mr-1" /> Show completed tasks</button>
+          } text-white p-2 rounded-md transition-colors`}><CheckCircle className="inline mr-1" /> Show completed tasks</button>
         </div>
 
         {/* Kanban Board */}
